@@ -19,7 +19,7 @@ jobs:
       - name: Download and set up Maven
         run: |
           MAVEN_VERSION="3.8.6"  # Specify the desired Maven version
-          wget -q "https://apache.mirror.digitalpacific.com.au/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          wget -q "https://mirrors.estointernet.in/apache/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
           tar xzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz"
           export M2_HOME="$PWD/apache-maven-${MAVEN_VERSION}"
           export PATH="$M2_HOME/bin:$PATH"
