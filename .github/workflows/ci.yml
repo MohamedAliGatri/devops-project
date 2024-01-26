@@ -24,7 +24,7 @@ jobs:
           export PATH="$M2_HOME/bin:$PATH"
       - name: Run Maven tests
         run: |
-          mvn --version
+          $PWD/apache-maven-3.6.3/bin/mvn --version
           mvn test
       - name: Run trivy fs check
         uses: aquasecurity/trivy-action@master
@@ -36,7 +36,7 @@ jobs:
           ignore-unfixed: true        
       - name: Increamenting application version
         run :  
-          mvn build-helper:parse-version versions:set \
+         $PWD/apache-maven-3.6.3/bin/mvn build-helper:parse-version versions:set \
             -DnewVersion=" \\\${parsedVersion.majorVersion}.\\\${parsedVersion.nextMinorVersion}"\
             versions:commit 
       - name: Extract the new version
