@@ -26,6 +26,11 @@ jobs:
           format: table
           exit-code: 0
           ignore-unfixed: true
+      - name: Set up Maven
+        uses: actions/setup-maven@v4
+        with:
+          maven-version: 3.8.6
+        
       - name: Increamenting application version
         run :  
           mvn build-helper:parse-version versions:set \
