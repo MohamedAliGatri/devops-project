@@ -1,0 +1,54 @@
+name: Github Actions CI Java Project
+
+on :
+  push:
+    branches:
+      - "Di"
+    
+jobs:
+  scan-test-phase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+      - name: Set up JAVA JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'adopt'
+      - name: Run Maven tests
+        run: mvn test
+      - name: Run trivy fs check
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: '.'
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+      - name: Increamenting application version
+        run :  
+          mvn build-helper:parse-version versions:set \
+            -DnewVersion=" \\\${parsedVersion.majorVersion}.\\\${parsedVersion.nextMinorVersion}"\
+            versions:commit 
+      - name: Extract the new version
+        run : echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
+      - name: Run maven package
+        run: mvn clean package
+      - name: Cache Maven build outputs
+        uses: actions/cache@v3
+        with:
+          path: target/your-app.jar
+          key: ${{ runner.os }}-maven-build-Di-${{ hashFiles('target/your-app.jar') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-build-Di-
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Docker build & push
+        run: |
+          docker build -t gatrimohamedali/devops-project:${{env.APP_VERSION}} .
+          docker push gatrimohamedali/devops-project:${{env.APP_VERSION}}
+     
