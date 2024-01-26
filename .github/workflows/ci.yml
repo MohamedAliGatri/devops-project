@@ -16,6 +16,13 @@ jobs:
         with:
           java-version: '11'
           distribution: 'adopt'
+      - name: Download and set up Maven
+        run: |
+          MAVEN_VERSION="3.8.6"  # Specify the desired Maven version
+          wget -q "https://apache.mirror.digitalpacific.com.au/maven/maven-3/${MAVEN_VERSION}/binaries/apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          tar xzf "apache-maven-${MAVEN_VERSION}-bin.tar.gz"
+          export M2_HOME="$PWD/apache-maven-${MAVEN_VERSION}"
+          export PATH="$M2_HOME/bin:$PATH"
       - name: Run Maven tests
         run: mvn test
       - name: Run trivy fs check
@@ -25,12 +32,7 @@ jobs:
           scan-ref: '.'
           format: table
           exit-code: 0
-          ignore-unfixed: true
-      - name: Set up Maven
-        uses: actions/setup-maven@v4
-        with:
-          maven-version: 3.8.6
-        
+          ignore-unfixed: true        
       - name: Increamenting application version
         run :  
           mvn build-helper:parse-version versions:set \
