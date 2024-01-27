@@ -83,10 +83,11 @@ jobs:
           sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
         run: |
-          git config --local user.email "action@github.com"  # Set email for commit
-          git config --local user.name "GitHub Action"
+          git config --global user.email "action@github.com"  # Set email for commit
+          git config --global user.name "GitHub Action"
+          git remote set-url origin https://${{secrets.GHA_access_key}}@github.com/MohamedAliGatri/ArgoCD-practice.git
           git add deployment.yml
           git commit -m "Github actions: Update application version"
-          git push
+          git push origin HEAD:main
 
      
