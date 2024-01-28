@@ -4,8 +4,7 @@ on :
   push:
     branches:
       - "Di"
-env:
-    
+
 jobs:
   scan-test-phase:
     runs-on: ubuntu-latest
