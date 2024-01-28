@@ -47,8 +47,8 @@ jobs:
       - name: Extract the new version
         run : |
           APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)
-          echo "APP_VERSION==$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
-          echo "APP_VERSION==$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_OUTPUT
+          echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
+          echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_OUTPUT
           
 
       - name: Run maven package
