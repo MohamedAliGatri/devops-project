@@ -83,17 +83,17 @@ jobs:
         with: 
           repository: MohamedAliGatri/ArgoCD-practice
           ref: main
-          token: ${{secrets.GHA_ACCESS_KEY}}
       - name: Update manifest file
         run: |
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
           sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{needs.scan-test-phase.outputs.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
         run: |
-          git config --global user.email "mohamedali.gatri@esprit.tn"  # Set email for commit
-          git config --global user.name "MohamedAliGatri"
+          git config --global user.email "action@github.com"  # Set email for commit
+          git config --global user.name "GitHub Action"
+          git remote set-url origin https://${{secrets.GHA_access_key}}@github.com/MohamedAliGatri/ArgoCD-practice.git
           git add deployment.yml
           git commit -m "Github actions: Update application version"
-          git push origin main
+          git push origin HEAD:main
 
      
