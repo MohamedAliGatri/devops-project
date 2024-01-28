@@ -50,6 +50,7 @@ jobs:
         run : |
           echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
           echo "::set-output name=APP_VERSION::$APP_VERSION"
+          echo $APP_VERSION
 
       - name: Run maven package
         run: mvn clean package
@@ -85,7 +86,10 @@ jobs:
           ref: main
           token: ${{secrets.GHA_ACCESS_KEY}}
       - name: Update manifest file
+        env:
+          APP_VERSION: ${{ needs.scan-test-phase.outputs.APP_VERSION }}
         run: |
+          echo $APP_VERSION
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
           sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{needs.scan-test-phase.outputs.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
