@@ -4,10 +4,13 @@ on :
   push:
     branches:
       - "Di"
+env:
     
 jobs:
   scan-test-phase:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.scan-test-phase.outputs.APP_VERSION }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -43,7 +46,9 @@ jobs:
         run : mvn build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}' versions:commit
 
       - name: Extract the new version
-        run : echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
+        run : |
+          echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
+          echo "::set-output name=APP_VERSION::$APP_VERSION"
 
       - name: Run maven package
         run: mvn clean package
@@ -81,7 +86,7 @@ jobs:
       - name: Update manifest file
         run: |
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
-          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}/g" deployment.yml
+          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{needs.scan-test-phase.outputs.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
         run: |
           git config --global user.email "mohamedali.gatri@esprit.tn"  # Set email for commit
