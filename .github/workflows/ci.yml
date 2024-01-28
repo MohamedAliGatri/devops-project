@@ -10,7 +10,7 @@ jobs:
   scan-test-phase:
     runs-on: ubuntu-latest
     outputs:
-      APP_VERSION: ${{ steps.scan-test-phase.outputs.APP_VERSION }}
+      APP_VERSION: ${{ steps.extract-new-version.outputs.APP_VERSION }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -46,6 +46,7 @@ jobs:
         run : mvn build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}' versions:commit
 
       - name: Extract the new version
+        id: extract-new-version
         run : |
           echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
           echo "::set-output name=APP_VERSION::$APP_VERSION"
