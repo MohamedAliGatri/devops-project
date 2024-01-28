@@ -4,12 +4,11 @@ on :
   push:
     branches:
       - "Di"
-    
+env:
+  APP_VERSION_GLOBAL: ""
 jobs:
   scan-test-phase:
     runs-on: ubuntu-latest
-    outputs:
-      APP_VERSION: ${{steps.extract-version.outputs.APP_VERSION}}
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -46,8 +45,9 @@ jobs:
 
       - id: extract-version
         run : |
-          echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
-          echo "APP_VERSION=$APP_VERSION" >> "$env.GITHUB_OUTPUT"
+          echo "APP_VERSION_GLOBAL=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
+          echo "APP_VERSION=$APP_VERSION_GLOBAL" >> "$env.GITHUB_OUTPUT"
+
         
 
       - name: Run maven package
@@ -69,8 +69,8 @@ jobs:
           
       - name: Docker build & push
         run: |
-          docker build -t ${{secrets.DOCKER_REPO}}/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}} .
-          docker push ${{secrets.DOCKER_REPO}}/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}
+          docker build -t ${{secrets.DOCKER_REPO}}/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION_GLOBAL}} .
+          docker push ${{secrets.DOCKER_REPO}}/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION_GLOBAL}}
 
   update-manifest-file:
     needs: scan-test-phase
@@ -84,11 +84,9 @@ jobs:
           ref: main
           token: ${{secrets.GHA_ACCESS_KEY}}
       - name: Update manifest file
-        env:
-          APP_VERSION: ${{needs.scan-test-phase.outputs.APP_VERSION}}
         run: |
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
-          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}/g" deployment.yml
+          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION_GLOBAL}}/g" deployment.yml
       - name: Commit the version update
         run: |
           git config --global user.email "mohamedali.gatri@esprit.tn"
