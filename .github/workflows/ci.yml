@@ -47,7 +47,8 @@ jobs:
       - id: extract-version
         run : |
           echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
-          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_OUTPUT"
+          echo "APP_VERSION=$APP_VERSION" >> "$env.GITHUB_OUTPUT"
+        
 
       - name: Run maven package
         run: mvn clean package
