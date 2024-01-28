@@ -84,9 +84,11 @@ jobs:
           ref: main
           token: ${{secrets.GHA_ACCESS_KEY}}
       - name: Update manifest file
+        env:
+          APP_VERSION: ${{needs.scan-test-phase.outputs.APP_VERSION}}
         run: |
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
-          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{needs.scan-test-phase.outputs.APP_VERSION}}/g" deployment.yml
+          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
         run: |
           git config --global user.email "mohamedali.gatri@esprit.tn"
