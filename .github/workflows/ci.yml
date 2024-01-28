@@ -45,11 +45,10 @@ jobs:
       - name: Increamenting application version
         run : mvn build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}' versions:commit
 
-      - name: Extract the new version
-        id: extract-new-version
+      - id: extract-new-version
         run : |
           echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
-          echo "::set-output APP_VERSION=${{env.APP_VERSION}}"
+          echo "::set-output name=APP_VERSION::$APP_VERSION"
           echo $APP_VERSION
 
       - name: Run maven package
