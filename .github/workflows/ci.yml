@@ -4,13 +4,10 @@ on :
   push:
     branches:
       - "Di"
-      
     
 jobs:
   scan-test-phase:
     runs-on: ubuntu-latest
-    outputs:
-      APP_VERSION: ${{ steps.extract-new-version.outputs.APP_VERSION }}
     steps:
       - name: Git checkout
         uses: actions/checkout@v3
@@ -45,11 +42,8 @@ jobs:
       - name: Increamenting application version
         run : mvn build-helper:parse-version versions:set -DnewVersion='${parsedVersion.majorVersion}.${parsedVersion.nextMinorVersion}' versions:commit
 
-      - id: extract-new-version
-        run : |
-          echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
-          echo "::set-output name=APP_VERSION::${{env.APP_VERSION}}"
-          echo $APP_VERSION
+      - name: Extract the new version
+        run : echo "APP_VERSION=$(grep -oPm2 '(?<=<version>)[^<]+' pom.xml | tail -n 1)" >> $GITHUB_ENV
 
       - name: Run maven package
         run: mvn clean package
@@ -83,17 +77,17 @@ jobs:
         with: 
           repository: MohamedAliGatri/ArgoCD-practice
           ref: main
+          token: ${{secrets.GHA_ACCESS_KEY}}
       - name: Update manifest file
         run: |
           VERSION=$(grep -oP '(?<=gatrimohamedali/devops-project:)\d+\.\d+' deployment.yml)
-          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{needs.scan-test-phase.outputs.APP_VERSION}}/g" deployment.yml
+          sed -i "s/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:$VERSION/${{secrets.DOCKER_REPO}}\/${{secrets.IMAGE_NAME}}:${{env.APP_VERSION}}/g" deployment.yml
       - name: Commit the version update
         run: |
-          git config --global user.email "action@github.com"  # Set email for commit
-          git config --global user.name "GitHub Action"
-          git remote set-url origin https://${{secrets.GHA_access_key}}@github.com/MohamedAliGatri/ArgoCD-practice.git
+          git config --global user.email "mohamedali.gatri@esprit.tn"
+          git config --global user.name "MohamedAliGatri
           git add deployment.yml
           git commit -m "Github actions: Update application version"
-          git push origin HEAD:main
+          git push origin main
 
      
